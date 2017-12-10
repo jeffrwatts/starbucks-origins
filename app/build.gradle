@@ -25,6 +25,9 @@ dependencies {
 
     compile 'com.android.support:support-v13:26.1.0'
 
+    // Tensorflow
+    compile 'org.tensorflow:tensorflow-android:+'
+
     // Test Framework
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'

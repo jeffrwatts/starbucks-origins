@@ -661,8 +661,7 @@ public class Camera2BasicFragment extends Fragment
       showToast("Uninitialized Classifier or invalid context.");
       return;
     }
-    Bitmap bitmap =
-        textureView.getBitmap(ImageClassifier.DIM_IMG_SIZE_X, ImageClassifier.DIM_IMG_SIZE_Y);
+    Bitmap bitmap = textureView.getBitmap(ImageClassifier.IMAGE_WIDTH, ImageClassifier.IMAGE_HEIGHT);
     String textToShow = classifier.classifyFrame(bitmap);
     bitmap.recycle();
     showToast(textToShow);
