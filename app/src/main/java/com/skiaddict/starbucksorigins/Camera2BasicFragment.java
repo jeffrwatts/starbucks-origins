@@ -43,6 +43,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.ImageReader;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
@@ -55,14 +56,24 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -83,6 +94,10 @@ public class Camera2BasicFragment extends Fragment
   private boolean runClassifier = false;
   private boolean checkedPermissions = false;
   private TextView textView;
+  private Spinner spinnerModeView;
+  private int picturesTaken = 0;
+  private long lastTime = 0;
+  private String selectedCard = "None";
 
   private ImageClassifier classifier;
 
@@ -291,6 +306,26 @@ public class Camera2BasicFragment extends Fragment
   public void onViewCreated(final View view, Bundle savedInstanceState) {
     textureView = (AutoFitTextureView) view.findViewById(R.id.texture);
     textView = (TextView) view.findViewById(R.id.text);
+    spinnerModeView = (Spinner) view.findViewById(R.id.spinnerMode);
+
+
+    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(), R.array.card_array, android.R.layout.simple_spinner_item);
+    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    spinnerModeView.setAdapter(adapter);
+
+    spinnerModeView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+      @Override
+      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        selectedCard = ((TextView) view).getText().toString();
+        picturesTaken = 0;
+        lastTime = System.currentTimeMillis();
+      }
+
+      @Override
+      public void onNothingSelected(AdapterView<?> parent) {
+
+      }
+    });
   }
 
   /** Load the model and labels. */
@@ -662,7 +697,20 @@ public class Camera2BasicFragment extends Fragment
       return;
     }
     Bitmap bitmap = textureView.getBitmap(ImageClassifier.IMAGE_WIDTH, ImageClassifier.IMAGE_HEIGHT);
-    String textToShow = classifier.classifyFrame(bitmap);
+
+    String textToShow;
+
+    if (selectedCard.contentEquals("None")) {
+      textToShow = classifier.classifyFrame(bitmap);
+    } else {
+      if (System.currentTimeMillis() - lastTime > 1000) {
+        SaveImage(bitmap);
+        picturesTaken++;
+        lastTime = System.currentTimeMillis();
+      }
+      textToShow = "Pictures Taken: " + picturesTaken;
+    }
+
     bitmap.recycle();
     showToast(textToShow);
   }
@@ -705,6 +753,28 @@ public class Camera2BasicFragment extends Fragment
                 }
               })
           .create();
+    }
+  }
+
+  private void SaveImage(Bitmap finalBitmap) {
+    String root = "/storage/3337-6330/Android/data/com.skiaddict.starbucksorigins/files/Pictures/";
+    File myDir = new File(root + "starbucks/" + selectedCard);
+    myDir.mkdirs();
+    Random generator = new Random();
+    int n = 100000;
+    n = generator.nextInt(n);
+    String fname = "Image-"+ n +".jpg";
+    File file = new File (myDir, fname);
+    if (file.exists ())
+      file.delete ();
+    try {
+      FileOutputStream out = new FileOutputStream(file);
+      finalBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+      out.flush();
+      out.close();
+
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 }

@@ -8,4 +8,21 @@
     <string name="toggle_turn_off">NN:Off</string>
     <string name="toggle">Use NNAPI</string>
 
+    <string-array name="card_array">
+        <item>None</item>
+        <item>sumatra</item>
+        <item>ethiopia</item>
+        <item>pantheon</item>
+        <item>christmas</item>
+        <item>decafcostarica</item>
+        <item>costarica</item>
+        <item>guatemala</item>
+        <item>princi</item>
+        <item>tanzaniaestate</item>
+        <item>tanzaniameru</item>
+        <item>panama</item>
+        <item>nicaragua</item>
+        <item>nocoffee</item>
+    </string-array>
+
 </resources>
